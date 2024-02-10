@@ -1,6 +1,7 @@
 import { info } from "./utils/logger.js";
 import { MONGODB_URI } from "./utils/config.js";
 import express from "express";
+import "express-async-errors";
 import cors from "cors";
 import { blogRouter } from "./controllers/blog.js";
 import {

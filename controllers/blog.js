@@ -16,7 +16,7 @@ blogRouter.get("/:id", async (request, response) => {
   response.json(blog);
 });
 
-blogRouter.post("/post", async (request, response, next) => {
+blogRouter.post("/", async (request, response, next) => {
   const body = request.body;
 
   if (!body.title || !body.author || !body.url || !body.likes) {
@@ -43,12 +43,12 @@ blogRouter.post("/post", async (request, response, next) => {
   response.status(201).json(savedBlog);
 });
 
-blogRouter.delete("/delete/:id", async (request, response, next) => {
+blogRouter.delete("/:id", async (request, response, next) => {
   await Blog.findByIdAndDelete(request.params.id);
   response.status(204).end();
 });
 
-blogRouter.put("/update/:id", async (request, response) => {
+blogRouter.put("/:id", async (request, response) => {
   const body = request.body;
 
   if (!body.title || !body.author || !body.url || !body.likes) {

@@ -78,7 +78,7 @@ describe("addition of a new blog", () => {
     };
 
     await api
-      .post("/api/blogs/post")
+      .post("/api/blogs")
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/);
@@ -97,7 +97,7 @@ describe("addition of a new blog", () => {
       likes: 9,
     };
 
-    await api.post("/api/blogs/post").send(newBlog).expect(400);
+    await api.post("/api/blogs").send(newBlog).expect(400);
 
     const blogsAtEnd = await blogsInDb();
 
@@ -110,7 +110,7 @@ describe("deletion of a blog", () => {
     const blogsAtStart = await blogsInDb();
     const blogToDelete = blogsAtStart[0];
 
-    await api.delete(`/api/blogs/delete/${blogToDelete.id}`).expect(204);
+    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
 
     const blogsAtEnd = await blogsInDb();
     expect(blogsAtEnd).toHaveLength(initialBlogList.length - 1);
@@ -131,7 +131,7 @@ describe("updating of a blog", () => {
     const firstBlog = allBlogs[0];
 
     await api
-      .put(`/api/blogs/update/${firstBlog.id}`)
+      .put(`/api/blogs/${firstBlog.id}`)
       .send(initialBlogList[0])
       .expect(201)
       .expect("Content-Type", /application\/json/);

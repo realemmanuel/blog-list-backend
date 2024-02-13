@@ -1,7 +1,17 @@
 import express from "express";
 import Blog from "../models/blog.js";
+import User from "../models/user.js";
+import jwt from "jsonwebtoken";
 
 const blogRouter = express.Router();
+
+export const getTokenFrom = (request) => {
+  const authorization = request.get("authorization");
+  if (authorization ?? authorization.startsWith("Bearer ")) {
+    return authorization.replace("Bearer ", "");
+  }
+  return null;
+};
 
 blogRouter.get("/", async (request, response) => {
   const blogs = await Blog.find({});
@@ -21,7 +31,7 @@ blogRouter.post("/", async (request, response, next) => {
 
   if (!body.title || !body.author || !body.url || !body.likes) {
     return response.status(400).json({
-      error: "Name or Number missing",
+      error: "Name, Author, Url, Likes may be missing",
     });
   }
 
@@ -32,14 +42,23 @@ blogRouter.post("/", async (request, response, next) => {
     });
   }
 
+  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET);
+  if (!decodedToken.id) {
+    return response.status(401).json({ error: "token invalid" });
+  }
+  const user = await User.findById(decodedToken.id);
+
   const blog = new Blog({
     title: body.title,
     author: body.author,
     url: body.url,
     likes: body.likes,
+    user: user.id,
   });
 
   const savedBlog = await blog.save();
+  user.blogs = user.blogs.concat(savedBlog._id);
+  await user.save();
   response.status(201).json(savedBlog);
 });
 

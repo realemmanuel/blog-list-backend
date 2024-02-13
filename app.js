@@ -4,6 +4,8 @@ import express from "express";
 import "express-async-errors";
 import cors from "cors";
 import { blogRouter } from "./controllers/blog.js";
+import { userRouter } from "./controllers/users.js";
+import { loginRouter } from "./controllers/login.js";
 import {
   requestLogger,
   unknownEndpoint,
@@ -33,6 +35,8 @@ app.use(express.json());
 app.use(requestLogger);
 
 app.use("/api/blogs", blogRouter);
+app.use("/api/users", userRouter);
+app.use("/api/login", loginRouter);
 
 app.use(unknownEndpoint);
 app.use(errorHandler);

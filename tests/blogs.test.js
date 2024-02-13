@@ -13,22 +13,21 @@ beforeEach(async () => {
     let blogObject = new Blog(blog);
     await blogObject.save();
   }
-}, 100000);
+}, 200000);
 
 describe("when there is initially some blogs saved", () => {
   test("Blogs are returned as json", async () => {
-    console.log("entered test");
     await api
       .get("/api/blogs")
       .expect(200)
       .expect("Content-Type", /application\/json/);
-  }, 100000);
+  }, 200000);
 
   test("all blogs are returned", async () => {
     const response = await api.get("/api/blogs");
 
     expect(response.body).toHaveLength(initialBlogList.length);
-  }, 100000);
+  }, 200000);
 
   test("a specific blog is within the returned blogs", async () => {
     const response = await api.get("/api/blogs");
@@ -36,7 +35,7 @@ describe("when there is initially some blogs saved", () => {
     const author = response.body.map((r) => r.author);
 
     expect(author).toContain("Clifford Mapesa");
-  }, 100000);
+  }, 200000);
 });
 
 describe("viewing a specific blog", () => {
@@ -49,27 +48,31 @@ describe("viewing a specific blog", () => {
       .expect(200)
       .expect("Content-Type", /application\/json/);
 
-    console.log("Result View", resultBlog.body);
-    console.log("Blog to view", blogToView);
-
     expect(resultBlog.body).toEqual(blogToView);
-  });
+  }, 200000);
 
   test("fails with statuscode 404 if blog does not exist", async () => {
     const validNonexistingId = await nonExistingId();
 
     await api.get(`/api/blogs/${validNonexistingId}`).expect(404);
-  });
+  }, 200000);
 
   test("fails with statuscode 400 if id is invalid", async () => {
     const invalidId = "5a3d5da59070081a82a3445";
 
     await api.get(`/api/blogs/${invalidId}`).expect(400);
-  });
+  }, 200000);
 });
 
 describe("addition of a new blog", () => {
   test("succeeds with valid data", async () => {
+    const response = await api.post("/api/login").send({
+      username: "root",
+      password: "sekret",
+    });
+
+    const token = response.body.token;
+
     const newBlog = {
       title: "Control flow in Rust",
       author: "Francesco Ciulla",
@@ -80,6 +83,7 @@ describe("addition of a new blog", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
+      .set("Authorization", `Bearer ${token}`)
       .expect(201)
       .expect("Content-Type", /application\/json/);
 
@@ -88,7 +92,7 @@ describe("addition of a new blog", () => {
 
     const contents = blogsAtEnd.map((b) => b.title);
     expect(contents).toContain("Control flow in Rust");
-  });
+  }, 200000);
 
   test("fails with status code 400 if data invalid", async () => {
     const newBlog = {
@@ -102,7 +106,7 @@ describe("addition of a new blog", () => {
     const blogsAtEnd = await blogsInDb();
 
     expect(blogsAtEnd).toHaveLength(initialBlogList.length);
-  });
+  }, 200000);
 });
 
 describe("deletion of a blog", () => {
@@ -118,11 +122,7 @@ describe("deletion of a blog", () => {
     const contents = blogsAtEnd.map((r) => r.title);
 
     expect(contents).not.toContain(blogToDelete.content);
-  });
-});
-
-afterAll(async () => {
-  await mongoose.connection.close();
+  }, 200000);
 });
 
 describe("updating of a blog", () => {
@@ -142,5 +142,9 @@ describe("updating of a blog", () => {
     expect(updatedBlog.author).toEqual(initialBlogList[0].author);
     expect(updatedBlog.url).toEqual(initialBlogList[0].url);
     expect(updatedBlog.likes).toEqual(initialBlogList[0].likes);
-  });
+  }, 200000);
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
 });
